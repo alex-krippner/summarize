@@ -7,6 +7,7 @@ import { Typography, StyledLink, Spinner } from '../theme/styledComponents';
 import queries from '../apollo/queries';
 
 const ProfileInfo = () => {
+  let personalWebUrl = null;
   const username = React.useContext(UsernameContext);
 
   const { data, error } = useQuery(queries.GET_USER_DETAILS, {
@@ -20,7 +21,10 @@ const ProfileInfo = () => {
     );
   if (!data) return null;
   if (data.user.repositories.pageInfo.hasNextPage) return <Spinner aria-label="loading spinner" />;
-
+  if (data.user.websiteUrl) {
+    personalWebUrl = data.user.websiteUrl.match(/^(https?:\/\/)/);
+  }
+  personalWebUrl = personalWebUrl === null ? `http://${data.user.websiteUrl}` : data.user.websiteUrl;
   const date = new Date(data.user.createdAt).getFullYear();
   const location = data.user.location ? data.user.location : 'an unknown location';
 
@@ -31,7 +35,7 @@ const ProfileInfo = () => {
       </Header>
       <div>
         <Caption secondary fontSize="small" margin="2rem 0">
-          <StyledLink href={`${data.user.websiteUrl}`}>{data.user.websiteUrl}</StyledLink>
+          <StyledLink href={personalWebUrl}>{data.user.websiteUrl}</StyledLink>
         </Caption>
       </div>
       <div>
